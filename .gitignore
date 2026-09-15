@@ -19,4 +19,4 @@ Secrets.xcconfig
 !.env.example
 
 # Local API response sample at the repository root
-/json
+/FlightData
