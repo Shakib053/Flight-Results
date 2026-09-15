@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Xcode local state
+xcuserdata/
+*.xcuserstate
+
+# Generated build and test output
+DerivedData/
+build/
+.build/
+*.xcresult
+*.xcarchive
+
+# Local credentials; keep example configuration files tracked
+Secrets.xcconfig
+.env
+.env.*
+!.env.example
+
+# Local API response sample at the repository root
+/json
