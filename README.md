@@ -1,4 +1,4 @@
-# Flight Results
+# GoZayaan Flight Results
 
 GoZayaan iOS take-home project for a single flight-results screen built with SwiftUI.
 

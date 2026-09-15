@@ -32,11 +32,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0C72019E3059AC98007A943A /* Configuration */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Configuration;
-			sourceTree = "<group>";
-		};
 		0CF97A6E30599E340022E2A6 /* iOS-Flight-Results */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -47,7 +42,7 @@
 		};
 		0CF97A7C30599E350022E2A6 /* iOS-Flight-ResultsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "iOS-Flight-ResultsTests";
+			path = iOS-Flight-ResultsTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -73,7 +68,6 @@
 		0CF97A6330599E340022E2A6 = {
 			isa = PBXGroup;
 			children = (
-				0C72019E3059AC98007A943A /* Configuration */,
 				0CF97A6E30599E340022E2A6 /* iOS-Flight-Results */,
 				0CF97A7C30599E350022E2A6 /* iOS-Flight-ResultsTests */,
 				0CF97A6D30599E340022E2A6 /* Products */,
@@ -105,7 +99,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				0C72019E3059AC98007A943A /* Configuration */,
 				0CF97A6E30599E340022E2A6 /* iOS-Flight-Results */,
 			);
 			name = "iOS-Flight-Results";
@@ -343,8 +336,6 @@
 		};
 		0CF97A8E30599E350022E2A6 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 0C72019E3059AC98007A943A /* Configuration */;
-			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -353,7 +344,7 @@
 				DEVELOPMENT_TEAM = GRW9NYZR4G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iOS-Flight-Results/Info.plist";
+				INFOPLIST_FILE = iOS-Flight-Results/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -380,8 +371,6 @@
 		};
 		0CF97A8F30599E350022E2A6 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 0C72019E3059AC98007A943A /* Configuration */;
-			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -390,7 +379,7 @@
 				DEVELOPMENT_TEAM = GRW9NYZR4G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iOS-Flight-Results/Info.plist";
+				INFOPLIST_FILE = iOS-Flight-Results/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

@@ -1,0 +1,1 @@
+// Horizontal promotion carousel.

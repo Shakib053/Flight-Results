@@ -11,7 +11,7 @@ import SwiftUI
 struct iOS_Flight_ResultsApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            FlightResultsView()
         }
     }
 }
