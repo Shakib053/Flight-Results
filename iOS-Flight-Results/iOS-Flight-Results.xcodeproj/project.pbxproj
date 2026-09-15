@@ -42,7 +42,7 @@
 		};
 		0CF97A7C30599E350022E2A6 /* iOS-Flight-ResultsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = iOS-Flight-ResultsTests;
+			path = "iOS-Flight-ResultsTests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -344,7 +344,7 @@
 				DEVELOPMENT_TEAM = GRW9NYZR4G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = iOS-Flight-Results/Info.plist;
+				INFOPLIST_FILE = "iOS-Flight-Results/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -379,7 +379,7 @@
 				DEVELOPMENT_TEAM = GRW9NYZR4G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = iOS-Flight-Results/Info.plist;
+				INFOPLIST_FILE = "iOS-Flight-Results/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

@@ -1,1 +1,3 @@
-// Protocol implemented by live and mock flight-search services.
+protocol FlightSearchServicing {
+    func fetchFlights(for request: FlightSearchRequest) async throws -> SerpApiFlightSearchResponse
+}
