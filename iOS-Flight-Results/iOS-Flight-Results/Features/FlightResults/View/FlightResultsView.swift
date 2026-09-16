@@ -22,11 +22,25 @@ struct FlightResultsView: View {
                 isLoading: viewModel.state == .loading
             )
 
-            VStack(spacing: 16) {
-                switch viewModel.state {
-                case .loading:
+            switch viewModel.state {
+            case .loading:
+                SortFilterBarView(
+                    selectedSort: viewModel.sortOption,
+                    isSortEnabled: false,
+                    onSelectSort: viewModel.selectSort,
+                    onFilterTapped: {}
+                )
+                resultsContent {
                     ProgressView("Loading flights…")
-                case .success(let offers):
+                }
+            case .success(let offers):
+                SortFilterBarView(
+                    selectedSort: viewModel.sortOption,
+                    isSortEnabled: true,
+                    onSelectSort: viewModel.selectSort,
+                    onFilterTapped: {}
+                )
+                resultsContent {
                     Text("Received \(offers.count) flight offers")
                     List(offers) { offer in
                         VStack(alignment: .leading, spacing: 4) {
@@ -35,23 +49,32 @@ struct FlightResultsView: View {
                             Text("\(offer.currencyCode) \(offer.price)")
                         }
                     }
-                case .empty:
+                }
+            case .empty:
+                resultsContent {
                     Text("Request succeeded, but no flight offers were returned.")
                     Button("Try Again") {
                         Task { await viewModel.retry() }
                     }
-                case .error(let message):
+                }
+            case .error(let message):
+                resultsContent {
                     Text(message)
                     Button("Retry") {
                         Task { await viewModel.retry() }
                     }
                 }
             }
-            .padding()
         }
         .task {
             await viewModel.loadFlights()
         }
+    }
+
+    @ViewBuilder
+    private func resultsContent<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(spacing: 16, content: content)
+            .padding()
     }
 }
 #Preview {
