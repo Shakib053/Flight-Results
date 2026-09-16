@@ -9,6 +9,52 @@ final class FlightResultsViewModelTests: XCTestCase {
         destinationCode: "JFK", destinationCity: "New York", departureDate: Date(),
         passengerCount: 2, currencyCode: "BDT")
 
+    func testSuspendedRequestsAndRetriesExposeLoadingUntilEveryOutcome() async {
+        let empty = SerpApiFlightSearchResponse(bestFlights: [], otherFlights: nil)
+        let outcomes: [Result<SerpApiFlightSearchResponse, Error>] = [
+            .success(response()), .success(empty), .failure(FlightSearchError.transport)
+        ]
+
+        for (index, outcome) in outcomes.enumerated() {
+            let started = expectation(description: "Request \(index) started")
+            let service = SuspendedFlightService(onStart: { started.fulfill() })
+            let model = FlightResultsViewModel(request: request, service: service)
+            let load = Task { await model.loadFlights() }
+            await fulfillment(of: [started], timeout: 2)
+            XCTAssertEqual(model.state, .loading)
+
+            // Overlapping requests must not fetch again or replace the pending state.
+            await model.loadFlights()
+            await model.retry()
+            XCTAssertEqual(service.requests, [request])
+            XCTAssertEqual(model.state, .loading)
+
+            service.complete(outcome)
+            await load.value
+            switch index {
+            case 0:
+                guard case .success(let offers) = model.state else {
+                    XCTFail("Expected success"); continue
+                }
+                XCTAssertEqual(offers.map(\.price), [100, 200])
+            case 1:
+                XCTAssertEqual(model.state, .empty)
+            default:
+                XCTAssertEqual(model.state, .error("We couldn’t load flights. Please try again."))
+            }
+
+            let retryStarted = expectation(description: "Retry \(index) started")
+            service.onStart = { retryStarted.fulfill() }
+            let retry = Task { await model.retry() }
+            await fulfillment(of: [retryStarted], timeout: 2)
+            XCTAssertEqual(model.state, .loading)
+            XCTAssertEqual(service.requests, [request, request])
+            service.complete(.success(empty))
+            await retry.value
+            XCTAssertEqual(model.state, .empty)
+        }
+    }
+
     func testSuccessAndSortingWithoutRefetching() async {
         let service = RecordingService(response: response())
         let model = FlightResultsViewModel(request: request, service: service)
@@ -106,5 +152,28 @@ private final class RecordingService: FlightSearchServicing {
     func fetchFlights(for request: FlightSearchRequest) async throws -> SerpApiFlightSearchResponse {
         requests.append(request)
         return response
+    }
+}
+
+@MainActor
+private final class SuspendedFlightService: FlightSearchServicing {
+    var requests: [FlightSearchRequest] = []
+    var onStart: () -> Void
+    private var continuation: CheckedContinuation<SerpApiFlightSearchResponse, Error>?
+
+    init(onStart: @escaping () -> Void) { self.onStart = onStart }
+
+    func fetchFlights(for request: FlightSearchRequest) async throws -> SerpApiFlightSearchResponse {
+        requests.append(request)
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+            onStart()
+        }
+    }
+
+    func complete(_ result: Result<SerpApiFlightSearchResponse, Error>) {
+        let pending = continuation
+        continuation = nil
+        pending?.resume(with: result)
     }
 }

@@ -62,7 +62,6 @@ struct SortFilterBarView: View {
         }
         .buttonStyle(.plain)
         .disabled(!isSortEnabled)
-        .opacity(isSortEnabled ? 1 : 0.55)
         .accessibilityLabel("Sort flights")
         .accessibilityValue(selectedSort.rawValue)
         .accessibilityHint(isSortEnabled ? "Choose Cheapest or Fastest" : "Available after flights load")

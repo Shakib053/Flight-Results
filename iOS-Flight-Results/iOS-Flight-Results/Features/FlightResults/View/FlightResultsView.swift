@@ -30,9 +30,7 @@ struct FlightResultsView: View {
                     onSelectSort: viewModel.selectSort,
                     onFilterTapped: {}
                 )
-                resultsContent {
-                    ProgressView("Loading flights…")
-                }
+                LoadingSkeletonView()
             case .success(let offers):
                 SortFilterBarView(
                     selectedSort: viewModel.sortOption,

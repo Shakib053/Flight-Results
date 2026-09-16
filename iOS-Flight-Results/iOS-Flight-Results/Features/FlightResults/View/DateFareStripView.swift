@@ -6,10 +6,11 @@ struct DateFareStripView: View {
     let isLoading: Bool
     @ScaledMetric(relativeTo: .caption) private var chipWidth = 112.0
     @ScaledMetric(relativeTo: .body) private var iconSize = 40.0
-    @ScaledMetric(relativeTo: .subheadline) private var skeletonWidth = 96.0
-    @ScaledMetric(relativeTo: .subheadline) private var skeletonHeight = 20.0
+    @ScaledMetric(relativeTo: .subheadline) private var skeletonWidth = 72.0
+    @ScaledMetric(relativeTo: .subheadline) private var skeletonHeight = 12.0
 
     private let accent = Color(red: 1, green: 0.84, blue: 0)
+    private var chartColor: Color { isLoading ? Color(red: 188 / 255.0, green: 201 / 255.0, blue: 220 / 255.0) : accent }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -25,11 +26,11 @@ struct DateFareStripView: View {
 
             Image(systemName: "chart.xyaxis.line")
                 .font(.title3)
-                .foregroundStyle(accent)
+                .foregroundStyle(chartColor)
                 .frame(width: iconSize, height: iconSize)
                 .overlay {
                     RoundedRectangle(cornerRadius: 7)
-                        .stroke(accent, lineWidth: 1)
+                        .stroke(chartColor, lineWidth: 1)
                 }
                 .padding(.trailing, 16)
                 .accessibilityHidden(true)
@@ -44,7 +45,10 @@ struct DateFareStripView: View {
                 .font(.caption)
             if isLoading {
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(red: 0.08, green: 0.27, blue: 0.65))
+                    .fill(LinearGradient(
+                        colors: [Color(red: 1 / 255.0, green: 2 / 255.0, blue: 110 / 255.0),
+                                 Color(red: 29 / 255.0, green: 77 / 255.0, blue: 162 / 255.0)],
+                        startPoint: .leading, endPoint: .trailing))
                     .frame(width: skeletonWidth, height: skeletonHeight)
                     .accessibilityHidden(true)
             } else {
@@ -57,17 +61,17 @@ struct DateFareStripView: View {
         .padding(.horizontal, 4)
         .padding(.top, 10)
         .padding(.bottom, 12)
-        .foregroundStyle(option.isSelected ? accent : .white)
+        .foregroundStyle(option.isSelected && !isLoading ? accent : .white)
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(option.isSelected ? accent : .clear)
+                .fill(option.isSelected && !isLoading ? accent : .clear)
                 .frame(height: 3)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(isLoading
             ? "\(option.dayText) \(option.dateText), fare loading"
             : "\(option.dayText) \(option.dateText), \(fare)")
-        .accessibilityAddTraits(option.isSelected ? .isSelected : [])
+        .accessibilityAddTraits(option.isSelected && !isLoading ? .isSelected : [])
     }
 }
 

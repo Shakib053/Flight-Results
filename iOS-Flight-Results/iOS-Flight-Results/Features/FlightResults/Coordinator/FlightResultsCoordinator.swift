@@ -11,7 +11,7 @@ final class FlightResultsCoordinator: FlightResultsCoordinatorDelegate {
         self.openURL = openURL
         let request = FlightSearchRequest(
             originCode: "DAC", originCity: "Dhaka",
-            destinationCode: "JFK", destinationCity: "New York",
+            destinationCode: "BKK", destinationCity: "Bangkok",
             departureDate: Calendar.current.date(byAdding: .day, value: 30, to: now)!,
             passengerCount: 2, currencyCode: "USD"
         )
