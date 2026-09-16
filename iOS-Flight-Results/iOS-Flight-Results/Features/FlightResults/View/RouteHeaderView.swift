@@ -48,10 +48,15 @@ struct RouteHeaderView: View {
             .padding(.vertical, 10)
 
             Button(action: onEdit) {
-                Text("Edit")
-                    .font(.caption.weight(.semibold))
-                    .frame(minWidth: controlWidth, minHeight: 44)
-                    .contentShape(Rectangle())
+                VStack(spacing: 2) {
+                    Image(systemName: "pencil")
+                        .font(.body)
+
+                    Text("Edit")
+                        .font(.caption.weight(.semibold))
+                }
+                .frame(minWidth: controlWidth, minHeight: 44)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Edit search")

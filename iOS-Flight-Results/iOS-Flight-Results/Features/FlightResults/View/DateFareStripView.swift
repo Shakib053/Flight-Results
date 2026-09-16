@@ -2,8 +2,11 @@ import SwiftUI
 
 /// Display-only dates and sample fares; scrolling never changes the search.
 struct DateFareStripView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     let options: [DateFareOption]
     let isLoading: Bool
+    @State private var skeletonStartedAt = Date()
     @ScaledMetric(relativeTo: .caption) private var chipWidth = 112.0
     @ScaledMetric(relativeTo: .body) private var iconSize = 40.0
     @ScaledMetric(relativeTo: .subheadline) private var skeletonWidth = 72.0
@@ -13,44 +16,49 @@ struct DateFareStripView: View {
     private var chartColor: Color { isLoading ? Color(red: 188 / 255.0, green: 201 / 255.0, blue: 220 / 255.0) : accent }
 
     var body: some View {
-        HStack(spacing: 12) {
-            ScrollView(.horizontal) {
-                HStack(spacing: 12) {
-                    ForEach(options) { option in
-                        chip(option)
+        TimelineView(.animation(
+            minimumInterval: 1 / 30.0,
+            paused: !isLoading || reduceMotion || scenePhase != .active
+        )) { context in
+            let elapsed = max(0, context.date.timeIntervalSince(skeletonStartedAt))
+
+            HStack(spacing: 12) {
+                ScrollView(.horizontal) {
+                    HStack(spacing: 12) {
+                        ForEach(options) { option in
+                            chip(option, elapsed: elapsed)
+                        }
                     }
                 }
-            }
-            .scrollIndicators(.hidden)
-            .fixedSize(horizontal: false, vertical: true)
+                .scrollIndicators(.hidden)
+                .fixedSize(horizontal: false, vertical: true)
 
-            Image(systemName: "chart.xyaxis.line")
-                .font(.title3)
-                .foregroundStyle(chartColor)
-                .frame(width: iconSize, height: iconSize)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 7)
-                        .stroke(chartColor, lineWidth: 1)
-                }
-                .padding(.trailing, 16)
-                .accessibilityHidden(true)
+                Image(systemName: "chart.xyaxis.line")
+                    .font(.title3)
+                    .foregroundStyle(chartColor)
+                    .frame(width: iconSize, height: iconSize)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 7)
+                            .stroke(chartColor, lineWidth: 1)
+                    }
+                    .padding(.trailing, 16)
+                    .accessibilityHidden(true)
+            }
         }
         .background(Color(red: 0.035, green: 0, blue: 0.38))
+        .onAppear { skeletonStartedAt = Date() }
+        .onChange(of: isLoading) { _, loading in
+            if loading { skeletonStartedAt = Date() }
+        }
     }
 
-    private func chip(_ option: DateFareOption) -> some View {
+    private func chip(_ option: DateFareOption, elapsed: TimeInterval) -> some View {
         let fare = "\(option.currencyCode) \(option.price.formatted(.number.locale(Locale(identifier: "en_US"))))"
         return VStack(spacing: 8) {
             Text("\(option.dayText) \(option.dateText)")
                 .font(.caption)
             if isLoading {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(LinearGradient(
-                        colors: [Color(red: 1 / 255.0, green: 2 / 255.0, blue: 110 / 255.0),
-                                 Color(red: 29 / 255.0, green: 77 / 255.0, blue: 162 / 255.0)],
-                        startPoint: .leading, endPoint: .trailing))
-                    .frame(width: skeletonWidth, height: skeletonHeight)
-                    .accessibilityHidden(true)
+                fareSkeleton(elapsed: elapsed)
             } else {
                 Text(fare)
                     .font(.subheadline.weight(option.isSelected ? .semibold : .regular))
@@ -72,6 +80,32 @@ struct DateFareStripView: View {
             ? "\(option.dayText) \(option.dateText), fare loading"
             : "\(option.dayText) \(option.dateText), \(fare)")
         .accessibilityAddTraits(option.isSelected && !isLoading ? .isSelected : [])
+    }
+
+    private func fareSkeleton(elapsed: TimeInterval) -> some View {
+        RoundedRectangle(cornerRadius: 5, style: .continuous)
+            .fill(LinearGradient(
+                colors: [Color(red: 1 / 255.0, green: 2 / 255.0, blue: 110 / 255.0),
+                         Color(red: 29 / 255.0, green: 77 / 255.0, blue: 162 / 255.0)],
+                startPoint: .leading, endPoint: .trailing))
+            .frame(width: skeletonWidth, height: skeletonHeight)
+            .overlay {
+                if !reduceMotion {
+                    GeometryReader { geometry in
+                        let phase = elapsed.truncatingRemainder(dividingBy: 1.8) / 1.8
+                        LinearGradient(
+                            colors: [.clear, .white.opacity(0.18), .clear],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        .frame(width: geometry.size.width * 0.6)
+                        .offset(x: geometry.size.width * (phase * 1.6 - 0.8))
+                    }
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 }
 
