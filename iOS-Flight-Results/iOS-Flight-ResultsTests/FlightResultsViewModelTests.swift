@@ -40,7 +40,7 @@ final class FlightResultsViewModelTests: XCTestCase {
             case 1:
                 XCTAssertEqual(model.state, .empty)
             default:
-                XCTAssertEqual(model.state, .error("We couldn’t load flights. Please try again."))
+                XCTAssertEqual(model.state, .error)
             }
 
             let retryStarted = expectation(description: "Retry \(index) started")
@@ -85,12 +85,23 @@ final class FlightResultsViewModelTests: XCTestCase {
     }
 
     func testFailuresUseSafeMessage() async {
-        for error in [FlightSearchError.missingAPIKey, .transport, .httpStatus(500), .decoding, .apiError] {
+        let errors: [FlightSearchError] = [
+            .missingAPIKey, .invalidRequest, .transport, .invalidResponse,
+            .httpStatus(500), .decoding, .apiError
+        ]
+        for error in errors {
             let model = FlightResultsViewModel(request: request,
                 service: MockFlightSearchService(result: .failure(error)))
             await model.loadFlights()
-            XCTAssertEqual(model.state, .error("We couldn’t load flights. Please try again."))
+            XCTAssertEqual(model.state, .error)
         }
+    }
+
+    func testCancellationDoesNotExposeError() async {
+        let model = FlightResultsViewModel(request: request,
+            service: MockFlightSearchService(result: .failure(CancellationError())))
+        await model.loadFlights()
+        XCTAssertEqual(model.state, .loading)
     }
 
     func testInvalidOffersProduceEmptyState() async {
@@ -99,6 +110,13 @@ final class FlightResultsViewModelTests: XCTestCase {
         let model = FlightResultsViewModel(request: request, service: MockFlightSearchService(result: .success(response)))
         await model.loadFlights()
         XCTAssertEqual(model.state, .empty)
+    }
+
+    func testDateFareStripVisibilityMatchesScreenState() {
+        XCTAssertTrue(FlightResultsView.shouldShowDateFareStrip(for: .loading))
+        XCTAssertTrue(FlightResultsView.shouldShowDateFareStrip(for: .success([])))
+        XCTAssertFalse(FlightResultsView.shouldShowDateFareStrip(for: .empty))
+        XCTAssertFalse(FlightResultsView.shouldShowDateFareStrip(for: .error))
     }
 
     func testDateFaresMatchRequestedDepartureAndStayStaticAfterLoading() async {

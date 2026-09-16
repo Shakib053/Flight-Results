@@ -7,7 +7,7 @@ final class FlightResultsViewModel: ObservableObject {
         case loading
         case success([FlightOffer])
         case empty
-        case error(String)
+        case error
     }
 
     enum SortOption: String, CaseIterable {
@@ -54,7 +54,7 @@ final class FlightResultsViewModel: ObservableObject {
             }
             #endif
             offers = []
-            state = .error("We couldn’t load flights. Please try again.")
+            state = .error
         }
     }
 

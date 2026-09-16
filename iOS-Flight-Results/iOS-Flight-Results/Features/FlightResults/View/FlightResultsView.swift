@@ -58,12 +58,9 @@ struct FlightResultsView: View {
                 EmptyStateView {
                     Task { await viewModel.retry() }
                 }
-            case .error(let message):
-                resultsContent {
-                    Text(message)
-                    Button("Retry") {
-                        Task { await viewModel.retry() }
-                    }
+            case .error:
+                ErrorStateView {
+                    Task { await viewModel.retry() }
                 }
             }
         }
@@ -78,19 +75,17 @@ struct FlightResultsView: View {
         }
     }
 
-    @ViewBuilder
-    private func resultsContent<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        VStack(spacing: 16, content: content)
-            .padding()
-    }
-
     private var isLoadingVisible: Bool {
         if case .loading = displayedState { return true }
         return false
     }
 
     private var isDateFareStripVisible: Bool {
-        switch displayedState {
+        Self.shouldShowDateFareStrip(for: displayedState)
+    }
+
+    static func shouldShowDateFareStrip(for state: FlightResultsViewModel.State) -> Bool {
+        switch state {
         case .loading, .success:
             return true
         case .empty, .error:
