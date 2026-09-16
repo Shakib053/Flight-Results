@@ -61,6 +61,11 @@ struct SerpApiFlightSearchService: FlightSearchServicing {
             throw FlightSearchError.invalidResponse
         }
         guard (200..<300).contains(http.statusCode) else {
+            #if DEBUG
+            if let body = String(data: data, encoding: .utf8) {
+                print("SerpApi response (\(http.statusCode)): \(body)")
+            }
+            #endif
             throw FlightSearchError.httpStatus(http.statusCode)
         }
         // An API error must not appear as an empty successful search.

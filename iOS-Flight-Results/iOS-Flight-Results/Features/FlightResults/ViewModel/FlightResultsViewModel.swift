@@ -24,10 +24,10 @@ final class FlightResultsViewModel: ObservableObject {
     private var isLoading = false
 
     init(request: FlightSearchRequest, service: any FlightSearchServicing,
-         mapper: FlightOfferMapper = FlightOfferMapper()) {
+         mapper: FlightOfferMapper? = nil) {
         self.request = request
         self.service = service
-        self.mapper = mapper
+        self.mapper = mapper ?? FlightOfferMapper()
     }
 
     func loadFlights() async {
@@ -44,6 +44,12 @@ final class FlightResultsViewModel: ObservableObject {
         } catch is CancellationError {
             // A disappearing screen may cancel its task; don't show a network error.
         } catch {
+            #if DEBUG
+            // Only log our sanitized error enum, never credential-bearing URLs.
+            if let searchError = error as? FlightSearchError {
+                print("Flight search failed: \(searchError)")
+            }
+            #endif
             offers = []
             state = .error("We couldn’t load flights. Please try again.")
         }

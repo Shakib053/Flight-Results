@@ -19,6 +19,7 @@
 /* Begin PBXFileReference section */
 		0CF97A6C30599E340022E2A6 /* iOS-Flight-Results.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iOS-Flight-Results.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CF97A7930599E350022E2A6 /* iOS-Flight-ResultsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "iOS-Flight-ResultsTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A713E02D9B514C5E8C901001 /* iOS-Flight-Results/Configuration/App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-Flight-Results/Configuration/App.xcconfig"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -65,12 +66,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0C26D616305A569E00C20F60 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				A713E02D9B514C5E8C901001 /* iOS-Flight-Results/Configuration/App.xcconfig */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		0CF97A6330599E340022E2A6 = {
 			isa = PBXGroup;
 			children = (
 				0CF97A6E30599E340022E2A6 /* iOS-Flight-Results */,
 				0CF97A7C30599E350022E2A6 /* iOS-Flight-ResultsTests */,
 				0CF97A6D30599E340022E2A6 /* Products */,
+				0C26D616305A569E00C20F60 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -336,6 +346,7 @@
 		};
 		0CF97A8E30599E350022E2A6 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A713E02D9B514C5E8C901001 /* iOS-Flight-Results/Configuration/App.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -371,6 +382,7 @@
 		};
 		0CF97A8F30599E350022E2A6 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A713E02D9B514C5E8C901001 /* iOS-Flight-Results/Configuration/App.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
