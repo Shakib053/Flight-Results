@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Display-only dates and sample fares; scrolling never changes the search.
+/// Display-only dates and fares; scrolling never changes the search.
 struct DateFareStripView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase

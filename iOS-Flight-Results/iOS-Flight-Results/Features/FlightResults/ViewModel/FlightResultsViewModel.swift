@@ -19,7 +19,7 @@ final class FlightResultsViewModel: ObservableObject {
     @Published private(set) var sortOption: SortOption = .cheapest
     weak var output: (any FlightResultsCoordinatorDelegate)?
     let request: FlightSearchRequest
-    let dateFareOptions: [DateFareOption]
+    @Published private(set) var dateFareOptions: [DateFareOption]
     let promotions: [Promotion] = (1...7).map { index in
         Promotion(id: "discount-\(index)", imageName: "discount view",
                   title: "On International Flight\nBookings",
@@ -48,6 +48,7 @@ final class FlightResultsViewModel: ObservableObject {
             let response = try await service.fetchFlights(for: request)
             try Task.checkCancellation()
             offers = mapper.map(response, currencyCode: request.currencyCode)
+            updateSelectedDateFare(with: offers)
             state = offers.isEmpty ? .empty : .success(sortedOffers())
         } catch is CancellationError {
             // A disappearing screen may cancel its task; don't show a network error.
@@ -101,6 +102,22 @@ final class FlightResultsViewModel: ObservableObject {
                 price: price, currencyCode: "BDT", isSelected: offset == 0
             )
         }
+    }
+
+    /// The selected date reflects the cheapest successfully returned offer; adjacent dates are samples.
+    private func updateSelectedDateFare(with offers: [FlightOffer]) {
+        guard let cheapestOffer = offers.min(by: { $0.price < $1.price }),
+              let selectedIndex = dateFareOptions.firstIndex(where: \.isSelected) else { return }
+
+        let selectedOption = dateFareOptions[selectedIndex]
+        dateFareOptions[selectedIndex] = DateFareOption(
+            id: selectedOption.id,
+            dayText: selectedOption.dayText,
+            dateText: selectedOption.dateText,
+            price: cheapestOffer.price,
+            currencyCode: cheapestOffer.currencyCode,
+            isSelected: true
+        )
     }
 
     private func sortedOffers() -> [FlightOffer] {

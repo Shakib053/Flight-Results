@@ -119,19 +119,34 @@ final class FlightResultsViewModelTests: XCTestCase {
         XCTAssertFalse(FlightResultsView.shouldShowDateFareStrip(for: .error))
     }
 
-    func testDateFaresMatchRequestedDepartureAndStayStaticAfterLoading() async {
-        let model = dateFareModel(year: 2027, month: 2, day: 15)
-        let options = model.dateFareOptions
-        XCTAssertEqual(options.count, 7)
-        XCTAssertEqual(options.first?.id, "2027-02-15")
-        XCTAssertEqual(options.first?.dayText, "Mon")
-        XCTAssertEqual(options.first?.dateText, "15 Feb")
-        XCTAssertEqual(options.filter(\.isSelected).map(\.id), ["2027-02-15"])
-        XCTAssertEqual(options.first?.price, 70_129)
-        XCTAssertTrue(options.allSatisfy { $0.currencyCode == "BDT" })
-        XCTAssertEqual(Set(options.map(\.id)).count, 7)
+    func testSelectedDateFareUsesCheapestOfferAfterLoading() async {
+        let date = Calendar(identifier: .gregorian).date(
+            from: DateComponents(year: 2027, month: 2, day: 15, hour: 12))!
+        let request = FlightSearchRequest(originCode: "DAC", originCity: "Dhaka",
+            destinationCode: "JFK", destinationCity: "New York", departureDate: date,
+            passengerCount: 2, currencyCode: "USD")
+        let model = FlightResultsViewModel(request: request,
+            service: MockFlightSearchService(result: .success(response())),
+            mapper: FlightOfferMapper(usdToBdtRate: 123))
+        let placeholderOptions = model.dateFareOptions
+
+        XCTAssertEqual(placeholderOptions.count, 7)
+        XCTAssertEqual(placeholderOptions.first?.id, "2027-02-15")
+        XCTAssertEqual(placeholderOptions.first?.dayText, "Mon")
+        XCTAssertEqual(placeholderOptions.first?.dateText, "15 Feb")
+        XCTAssertEqual(placeholderOptions.filter(\.isSelected).map(\.id), ["2027-02-15"])
+        XCTAssertEqual(placeholderOptions.first?.price, 70_129)
+        XCTAssertTrue(placeholderOptions.allSatisfy { $0.currencyCode == "BDT" })
+        XCTAssertEqual(Set(placeholderOptions.map(\.id)).count, 7)
+
         await model.loadFlights()
-        XCTAssertEqual(model.dateFareOptions, options)
+        XCTAssertEqual(model.dateFareOptions.first?.price, 12_300)
+        XCTAssertEqual(model.dateFareOptions.first?.currencyCode, "BDT")
+        XCTAssertEqual(Array(model.dateFareOptions.dropFirst()), Array(placeholderOptions.dropFirst()))
+
+        model.selectSort(.fastest)
+        XCTAssertEqual(model.dateFareOptions.first?.price, 12_300)
+        XCTAssertEqual(model.dateFareOptions.first?.currencyCode, "BDT")
     }
 
     func testDateFaresCrossMonthAndYearBoundaries() {
