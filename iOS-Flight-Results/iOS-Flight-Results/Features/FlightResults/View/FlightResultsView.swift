@@ -22,10 +22,12 @@ struct FlightResultsView: View {
                 print("Edit tapped")
             }
 
-            DateFareStripView(
-                options: viewModel.dateFareOptions,
-                isLoading: isLoadingVisible
-            )
+            if isDateFareStripVisible {
+                DateFareStripView(
+                    options: viewModel.dateFareOptions,
+                    isLoading: isLoadingVisible
+                )
+            }
 
             switch displayedState {
             case .loading:
@@ -53,11 +55,8 @@ struct FlightResultsView: View {
                 }
                 .background(Color(red: 0.035, green: 0, blue: 0.38))
             case .empty:
-                resultsContent {
-                    Text("Request succeeded, but no flight offers were returned.")
-                    Button("Try Again") {
-                        Task { await viewModel.retry() }
-                    }
+                EmptyStateView {
+                    Task { await viewModel.retry() }
                 }
             case .error(let message):
                 resultsContent {
@@ -88,6 +87,15 @@ struct FlightResultsView: View {
     private var isLoadingVisible: Bool {
         if case .loading = displayedState { return true }
         return false
+    }
+
+    private var isDateFareStripVisible: Bool {
+        switch displayedState {
+        case .loading, .success:
+            return true
+        case .empty, .error:
+            return false
+        }
     }
 
     private func show(_ state: FlightResultsViewModel.State) {
