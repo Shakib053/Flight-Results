@@ -110,12 +110,10 @@ struct DateFareStripView: View {
 }
 
 private extension DateFareStripView {
-    static let previewOptions: [DateFareOption] = [
-        .init(id: "2026-02-08", dayText: "Sun", dateText: "08 Feb", price: 70_129, currencyCode: "BDT", isSelected: true),
-        .init(id: "2026-02-09", dayText: "Mon", dateText: "09 Feb", price: 74_240, currencyCode: "BDT", isSelected: false),
-        .init(id: "2026-02-10", dayText: "Tue", dateText: "10 Feb", price: 120_400, currencyCode: "BDT", isSelected: false),
-        .init(id: "2026-02-11", dayText: "Wed", dateText: "11 Feb", price: 82_650, currencyCode: "BDT", isSelected: false)
-    ]
+    static let previewOptions = FlightResultsDummyData.dateFareOptions(
+        departureDate: Calendar(identifier: .gregorian).date(
+            from: DateComponents(year: 2026, month: 2, day: 8, hour: 12))!
+    )
 }
 
 #Preview("Date fares · 375 points", traits: .sizeThatFitsLayout) {

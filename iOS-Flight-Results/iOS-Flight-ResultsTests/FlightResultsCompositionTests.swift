@@ -35,8 +35,8 @@ final class FlightResultsCompositionTests: XCTestCase {
         let model = coordinator.viewModel
         let promotions = model.promotions
         XCTAssertEqual(model.state, .loading)
-        XCTAssertEqual(promotions.count, 3)
-        XCTAssertEqual(Set(promotions.map(\.id)).count, 3)
+        XCTAssertEqual(promotions.count, 7)
+        XCTAssertEqual(Set(promotions.map(\.id)).count, 7)
         XCTAssertTrue(promotions.allSatisfy { $0.imageName == "discount view" })
         promotions.forEach(model.selectPromotion)
         await model.loadFlights()
@@ -44,7 +44,7 @@ final class FlightResultsCompositionTests: XCTestCase {
         model.selectSort(.fastest)
         XCTAssertEqual(model.promotions, promotions)
         promotions.forEach(model.selectPromotion)
-        XCTAssertEqual(openedURLs, Array(repeating: URL(string: "https://gozayaan.com")!, count: 6))
+        XCTAssertEqual(openedURLs, Array(repeating: URL(string: "https://gozayaan.com")!, count: 14))
     }
 
     func testPromotionIntentReachesCoordinator() async {

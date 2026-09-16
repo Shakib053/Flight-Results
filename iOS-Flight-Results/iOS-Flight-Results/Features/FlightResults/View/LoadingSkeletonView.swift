@@ -107,16 +107,12 @@ struct LoadingSkeletonView: View {
 }
 
 #Preview("Loading · 375 points") {
-    LoadingSkeletonView(isCompleting: false, promotions: (1...7).map {
-        Promotion(id: "preview-\($0)", imageName: "discount view",
-                  title: "On International Flight\nBookings", url: URL(string: "https://gozayaan.com")!)
-    }, onLearnMore: { _ in }).frame(width: 375)
+    LoadingSkeletonView(isCompleting: false, promotions: FlightResultsDummyData.promotions,
+                        onLearnMore: { _ in }).frame(width: 375)
 }
 
 #Preview("Loading · narrow, large text") {
-    LoadingSkeletonView(isCompleting: false, promotions: (1...7).map {
-        Promotion(id: "preview-\($0)", imageName: "discount view",
-                  title: "On International Flight\nBookings", url: URL(string: "https://gozayaan.com")!)
-    }, onLearnMore: { _ in }).frame(width: 320)
+    LoadingSkeletonView(isCompleting: false, promotions: FlightResultsDummyData.promotions,
+                        onLearnMore: { _ in }).frame(width: 320)
         .dynamicTypeSize(.accessibility3)
 }

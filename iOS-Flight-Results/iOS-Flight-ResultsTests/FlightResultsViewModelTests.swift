@@ -153,7 +153,7 @@ final class FlightResultsViewModelTests: XCTestCase {
         XCTAssertEqual(dateFareModel(year: 2028, month: 2, day: 27).dateFareOptions.map(\.dateText),
                        ["27 Feb", "28 Feb", "29 Feb", "01 Mar", "02 Mar", "03 Mar", "04 Mar"])
         XCTAssertEqual(dateFareModel(year: 2026, month: 12, day: 29).dateFareOptions.map(\.id),
-                       ["2026-12-29", "2026-12-30", "2026-12-31", "2027-01-01",
+                        ["2026-12-29", "2026-12-30", "2026-12-31", "2027-01-01",
                         "2027-01-02", "2027-01-03", "2027-01-04"])
     }
 

@@ -17,22 +17,25 @@ final class FlightResultsViewModel: ObservableObject {
 
     @Published private(set) var state: State = .loading
     @Published private(set) var sortOption: SortOption = .cheapest
-    weak var output: (any FlightResultsCoordinatorDelegate)?
-    let request: FlightSearchRequest
     @Published private(set) var dateFareOptions: [DateFareOption]
-    let promotions: [Promotion] = (1...7).map { index in
-        Promotion(id: "discount-\(index)", imageName: "discount view",
-                  title: "On International Flight\nBookings",
-                  url: URL(string: "https://gozayaan.com")!)
-    }
+    
+    weak var output: (any FlightResultsCoordinatorDelegate)?
+    
+    let request: FlightSearchRequest
+    let promotions: [Promotion]
+    
     private let service: any FlightSearchServicing
     private let mapper: FlightOfferMapper
     private var offers: [FlightOffer] = []
     private var isLoading = false
 
     init(request: FlightSearchRequest, service: any FlightSearchServicing,
-         mapper: FlightOfferMapper? = nil) {
-        self.dateFareOptions = Self.makeDateFareOptions(departureDate: request.departureDate)
+         mapper: FlightOfferMapper? = nil,
+         promotions: [Promotion]? = nil,
+         dateFareOptions: [DateFareOption]? = nil) {
+        self.dateFareOptions = dateFareOptions
+            ?? FlightResultsDummyData.dateFareOptions(departureDate: request.departureDate)
+        self.promotions = promotions ?? FlightResultsDummyData.promotions
         self.request = request
         self.service = service
         self.mapper = mapper ?? FlightOfferMapper()
@@ -76,31 +79,6 @@ final class FlightResultsViewModel: ObservableObject {
         sortOption = option
         if case .success = state {
             state = .success(sortedOffers())
-        }
-    }
-
-    private static func makeDateFareOptions(departureDate: Date) -> [DateFareOption] {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = .current
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.calendar = calendar
-        formatter.timeZone = calendar.timeZone
-        let fares = [70_129, 74_240, 120_400, 82_650, 76_890, 91_320, 79_450]
-
-        return fares.enumerated().compactMap { offset, price in
-            guard let date = calendar.date(byAdding: .day, value: offset, to: departureDate) else {
-                return nil
-            }
-            formatter.dateFormat = "yyyy-MM-dd"
-            let id = formatter.string(from: date)
-            formatter.dateFormat = "EEE"
-            let dayText = formatter.string(from: date)
-            formatter.dateFormat = "dd MMM"
-            return DateFareOption(
-                id: id, dayText: dayText, dateText: formatter.string(from: date),
-                price: price, currencyCode: "BDT", isSelected: offset == 0
-            )
         }
     }
 
