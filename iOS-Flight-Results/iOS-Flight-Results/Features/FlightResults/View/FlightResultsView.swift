@@ -37,6 +37,7 @@ struct FlightResultsView: View {
                     onSelectSort: viewModel.selectSort,
                     onFilterTapped: {}
                 )
+                .zIndex(1)
                 LoadingSkeletonView(isCompleting: isCompletingLoading,
                                     promotions: viewModel.promotions,
                                     onLearnMore: viewModel.selectPromotion)
@@ -47,6 +48,7 @@ struct FlightResultsView: View {
                     onSelectSort: viewModel.selectSort,
                     onFilterTapped: {}
                 )
+                .zIndex(1)
                 ScrollView {
                     LazyVStack(spacing: 16) {
                         ForEach(offers.prefix(2)) { offer in
