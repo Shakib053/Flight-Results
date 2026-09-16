@@ -40,16 +40,15 @@ struct FlightResultsView: View {
                     onSelectSort: viewModel.selectSort,
                     onFilterTapped: {}
                 )
-                resultsContent {
-                    Text("Received \(offers.count) flight offers")
-                    List(offers) { offer in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(offer.airlineName)
-                            Text("\(offer.departureAirportCode) → \(offer.arrivalAirportCode)")
-                            Text("\(offer.currencyCode) \(offer.price)")
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(offers) { offer in
+                            FlightCardView(offer: offer)
                         }
                     }
+                    .padding(16)
                 }
+                .background(Color(red: 0.035, green: 0, blue: 0.38))
             case .empty:
                 resultsContent {
                     Text("Request succeeded, but no flight offers were returned.")
