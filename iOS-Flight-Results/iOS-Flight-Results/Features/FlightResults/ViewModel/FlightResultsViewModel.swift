@@ -17,6 +17,7 @@ final class FlightResultsViewModel: ObservableObject {
 
     @Published private(set) var state: State = .loading
     @Published private(set) var sortOption: SortOption = .cheapest
+    weak var output: (any FlightResultsCoordinatorDelegate)?
     let request: FlightSearchRequest
     private let service: any FlightSearchServicing
     private let mapper: FlightOfferMapper
@@ -53,6 +54,10 @@ final class FlightResultsViewModel: ObservableObject {
             offers = []
             state = .error("We couldn’t load flights. Please try again.")
         }
+    }
+
+    func selectPromotion(_ promotion: Promotion) {
+        output?.didSelectPromotion(promotion)
     }
 
     func retry() async {

@@ -1,6 +1,9 @@
 import Foundation
 
 struct FlightOfferMapper {
+    /// Fixed manual rate, supplied by composition. Nil preserves the source currency.
+    var usdToBdtRate: Int? = nil
+
     func map(_ response: SerpApiFlightSearchResponse, currencyCode: String) -> [FlightOffer] {
         let groups = (response.bestFlights ?? []) + (response.otherFlights ?? [])
         return groups.compactMap { map($0, currencyCode: currencyCode) }
@@ -10,6 +13,18 @@ struct FlightOfferMapper {
         guard let first = group.flights.first, let last = group.flights.last,
               group.price >= 0, group.totalDuration >= 0,
               !first.departureAirport.id.isEmpty, !last.arrivalAirport.id.isEmpty else { return nil }
+
+        let price: Int
+        let displayCurrency: String
+        if currencyCode == "USD", let rate = usdToBdtRate {
+            let converted = group.price.multipliedReportingOverflow(by: rate)
+            guard rate > 0, !converted.overflow else { return nil }
+            price = converted.partialValue
+            displayCurrency = "BDT"
+        } else {
+            price = group.price
+            displayCurrency = currencyCode
+        }
 
         // UTC is a neutral calendar for comparing airport-local dates, not a time-zone conversion.
         let parser = DateFormatter()
@@ -55,8 +70,8 @@ struct FlightOfferMapper {
             arrivalDayOffset: dayOffset,
             totalDurationMinutes: group.totalDuration,
             stopCount: group.layovers?.count ?? max(0, group.flights.count - 1),
-            price: group.price,
-            currencyCode: currencyCode
+            price: price,
+            currencyCode: displayCurrency
         )
     }
 }

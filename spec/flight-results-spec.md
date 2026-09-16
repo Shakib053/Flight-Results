@@ -43,7 +43,7 @@ Shown when the request fails because of configuration, connectivity, server or d
 
 ## Data and mapping
 
-Flight data will come from the SerpApi Google Flights Results API. The request will use a one-way trip, BDT currency and a valid future departure date. The API key will be provided through local configuration and excluded from source control.
+Flight data will come from the SerpApi Google Flights Results API. The request will use a one-way trip, USD request currency and a valid future departure date. USD fares are converted locally to BDT using the fixed manual rate of 1 USD = 123 BDT before display and sorting. The API key will be provided through local configuration and excluded from source control.
 
 The API response models will remain separate from the app's flattened FlightOffer model. Both best_flights and other_flights may be absent or empty and will be handled safely.
 
@@ -59,7 +59,7 @@ struct FlightSearchRequest: Equatable {
     let destinationCity: String     // City name shown in the route header
     let departureDate: Date         // Date sent to the API and shown on screen
     let passengerCount: Int         // Displays 02 in the route header for this task
-    let currencyCode: String        // Uses BDT for the request and displayed prices
+    let currencyCode: String        // Uses USD for the API request; mapped offers display BDT
 }
 ```
 

@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct iOS_Flight_ResultsApp: App {
+    @StateObject private var coordinator = AppCoordinator()
+
     var body: some Scene {
         WindowGroup {
-            FlightResultsView()
+            coordinator.makeRootView()
         }
     }
 }

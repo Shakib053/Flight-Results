@@ -4,6 +4,17 @@ import XCTest
 final class FlightOfferMapperTests: XCTestCase {
     private let mapper = FlightOfferMapper()
 
+    func testManualUSDConversionAndBDTPassthrough() throws {
+        let converter = FlightOfferMapper(usdToBdtRate: 123)
+        let usd = try XCTUnwrap(converter.map(group([leg()]), currencyCode: "USD"))
+        XCTAssertEqual(usd.price, 37400 * 123)
+        XCTAssertEqual(usd.currencyCode, "BDT")
+        let bdt = try XCTUnwrap(converter.map(group([leg()]), currencyCode: "BDT"))
+        XCTAssertEqual(bdt.price, 37400)
+        XCTAssertEqual(bdt.currencyCode, "BDT")
+        XCTAssertNil(FlightOfferMapper(usdToBdtRate: Int.max).map(group([leg()]), currencyCode: "USD"))
+    }
+
     func testDirectFlightAndStableIdentity() throws {
         let group = group([leg()])
         let offer = try XCTUnwrap(mapper.map(group, currencyCode: "BDT"))

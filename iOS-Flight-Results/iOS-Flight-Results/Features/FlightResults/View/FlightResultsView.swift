@@ -7,62 +7,55 @@
 
 import SwiftUI
 
-/// The feature entry point. It will own rendering only; networking, mapping,
-/// sorting, and external navigation are injected from the composition root.
+/// Renders an injected ViewModel owned by the feature Coordinator.
 struct FlightResultsView: View {
-    var body: some View {
-        ContentView()
-    }
-}
-
-
-struct ContentView: View {
-    @StateObject private var vm = FlightResultsViewModel(
-        request: FlightSearchRequest(
-            originCode: "DAC",
-            originCity: "Dhaka",
-            destinationCode: "BKK",
-            destinationCity: "Bangkok",
-            departureDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()) ?? Date(),
-            passengerCount: 2,
-            currencyCode: "USD"
-        ),
-        service: SerpApiFlightSearchService()
-    )
+    @ObservedObject var viewModel: FlightResultsViewModel
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text("DAC → BKK · Data check")
-                .font(.headline)
+        VStack(spacing: 0) {
+            RouteHeaderView(request: viewModel.request) {
+                print("Edit tapped")
+            }
 
-            switch vm.state {
-            case .loading:
-                ProgressView("Loading flights…")
-            case .success(let offers):
-                Text("Received \(offers.count) flight offers")
-                List(offers) { offer in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(offer.airlineName)
-                        Text("\(offer.departureAirportCode) → \(offer.arrivalAirportCode)")
-                        Text("\(offer.currencyCode) \(offer.price)")
+            VStack(spacing: 16) {
+                switch viewModel.state {
+                case .loading:
+                    ProgressView("Loading flights…")
+                case .success(let offers):
+                    Text("Received \(offers.count) flight offers")
+                    List(offers) { offer in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(offer.airlineName)
+                            Text("\(offer.departureAirportCode) → \(offer.arrivalAirportCode)")
+                            Text("\(offer.currencyCode) \(offer.price)")
+                        }
+                    }
+                case .empty:
+                    Text("Request succeeded, but no flight offers were returned.")
+                    Button("Try Again") {
+                        Task { await viewModel.retry() }
+                    }
+                case .error(let message):
+                    Text(message)
+                    Button("Retry") {
+                        Task { await viewModel.retry() }
                     }
                 }
-            case .empty:
-                Text("Request succeeded, but no flight offers were returned.")
-            case .error(let message):
-                Text(message)
-                Button("Retry") {
-                    Task { await vm.retry() }
-                }
             }
+            .padding()
         }
-        .padding()
         .task {
-            await vm.loadFlights()
-            print(vm.state)
+            await viewModel.loadFlights()
         }
     }
 }
 #Preview {
-    FlightResultsView()
+    FlightResultsView(viewModel: FlightResultsViewModel(
+        request: FlightSearchRequest(
+            originCode: "DAC", originCity: "Dhaka",
+            destinationCode: "JFK", destinationCity: "New York",
+            departureDate: Date(), passengerCount: 2, currencyCode: "USD"
+        ),
+        service: MockFlightSearchService(result: .empty)
+    ))
 }

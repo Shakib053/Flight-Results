@@ -20,3 +20,6 @@ Secrets.xcconfig
 
 # Local API response sample at the repository root
 /FlightData
+
+
+/NOTES.md
