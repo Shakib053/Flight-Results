@@ -17,6 +17,11 @@ struct FlightResultsView: View {
                 print("Edit tapped")
             }
 
+            DateFareStripView(
+                options: viewModel.dateFareOptions,
+                isLoading: viewModel.state == .loading
+            )
+
             VStack(spacing: 16) {
                 switch viewModel.state {
                 case .loading:

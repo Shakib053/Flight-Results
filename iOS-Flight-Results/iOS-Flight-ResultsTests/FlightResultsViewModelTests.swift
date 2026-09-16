@@ -55,6 +55,38 @@ final class FlightResultsViewModelTests: XCTestCase {
         XCTAssertEqual(model.state, .empty)
     }
 
+    func testDateFaresMatchRequestedDepartureAndStayStaticAfterLoading() async {
+        let model = dateFareModel(year: 2027, month: 2, day: 15)
+        let options = model.dateFareOptions
+        XCTAssertEqual(options.count, 7)
+        XCTAssertEqual(options.first?.id, "2027-02-15")
+        XCTAssertEqual(options.first?.dayText, "Mon")
+        XCTAssertEqual(options.first?.dateText, "15 Feb")
+        XCTAssertEqual(options.filter(\.isSelected).map(\.id), ["2027-02-15"])
+        XCTAssertEqual(options.first?.price, 70_129)
+        XCTAssertTrue(options.allSatisfy { $0.currencyCode == "BDT" })
+        XCTAssertEqual(Set(options.map(\.id)).count, 7)
+        await model.loadFlights()
+        XCTAssertEqual(model.dateFareOptions, options)
+    }
+
+    func testDateFaresCrossMonthAndYearBoundaries() {
+        XCTAssertEqual(dateFareModel(year: 2028, month: 2, day: 27).dateFareOptions.map(\.dateText),
+                       ["27 Feb", "28 Feb", "29 Feb", "01 Mar", "02 Mar", "03 Mar", "04 Mar"])
+        XCTAssertEqual(dateFareModel(year: 2026, month: 12, day: 29).dateFareOptions.map(\.id),
+                       ["2026-12-29", "2026-12-30", "2026-12-31", "2027-01-01",
+                        "2027-01-02", "2027-01-03", "2027-01-04"])
+    }
+
+    private func dateFareModel(year: Int, month: Int, day: Int) -> FlightResultsViewModel {
+        let date = Calendar(identifier: .gregorian).date(
+            from: DateComponents(year: year, month: month, day: day, hour: 12))!
+        let request = FlightSearchRequest(originCode: "DAC", originCity: "Dhaka",
+            destinationCode: "JFK", destinationCity: "New York", departureDate: date,
+            passengerCount: 2, currencyCode: "USD")
+        return FlightResultsViewModel(request: request, service: MockFlightSearchService(result: .empty))
+    }
+
     private func response() -> SerpApiFlightSearchResponse {
         let leg = SerpApiFlightLeg(
             departureAirport: SerpApiAirport(id: "DAC", time: "2026-10-01 10:00"),
