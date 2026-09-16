@@ -37,7 +37,9 @@ struct FlightResultsView: View {
                     onSelectSort: viewModel.selectSort,
                     onFilterTapped: {}
                 )
-                LoadingSkeletonView(isCompleting: isCompletingLoading)
+                LoadingSkeletonView(isCompleting: isCompletingLoading,
+                                    promotions: viewModel.promotions,
+                                    onLearnMore: viewModel.selectPromotion)
             case .success(let offers):
                 SortFilterBarView(
                     selectedSort: viewModel.sortOption,
@@ -47,11 +49,18 @@ struct FlightResultsView: View {
                 )
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        ForEach(offers) { offer in
+                        ForEach(offers.prefix(2)) { offer in
                             FlightCardView(offer: offer)
+                                .padding(.horizontal, 16)
+                        }
+                        DiscountCarouselView(promotions: viewModel.promotions,
+                                             onLearnMore: viewModel.selectPromotion)
+                        ForEach(offers.dropFirst(2)) { offer in
+                            FlightCardView(offer: offer)
+                                .padding(.horizontal, 16)
                         }
                     }
-                    .padding(16)
+                    .padding(.vertical, 16)
                 }
                 .background(Color(red: 0.035, green: 0, blue: 0.38))
             case .empty:

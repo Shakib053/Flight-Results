@@ -5,6 +5,8 @@ struct LoadingSkeletonView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     let isCompleting: Bool
+    let promotions: [Promotion]
+    let onLearnMore: (Promotion) -> Void
     @State private var startedAt = Date()
     @ScaledMetric(relativeTo: .headline) private var messageSize = 20.0
 
@@ -49,11 +51,14 @@ struct LoadingSkeletonView: View {
                         .padding(.bottom, 28)
 
                     VStack(spacing: 8) {
-                        ForEach(0..<3) { _ in
+                        ForEach(0..<3) { index in
                             skeletonCard(elapsed: elapsed)
+                                .accessibilityHidden(true)
+                            if index == 1 {
+                                DiscountCarouselView(promotions: promotions, onLearnMore: onLearnMore)
+                            }
                         }
                     }
-                    .accessibilityHidden(true)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
@@ -102,10 +107,16 @@ struct LoadingSkeletonView: View {
 }
 
 #Preview("Loading · 375 points") {
-    LoadingSkeletonView(isCompleting: false).frame(width: 375)
+    LoadingSkeletonView(isCompleting: false, promotions: (1...7).map {
+        Promotion(id: "preview-\($0)", imageName: "discount view",
+                  title: "On International Flight\nBookings", url: URL(string: "https://gozayaan.com")!)
+    }, onLearnMore: { _ in }).frame(width: 375)
 }
 
 #Preview("Loading · narrow, large text") {
-    LoadingSkeletonView(isCompleting: false).frame(width: 320)
+    LoadingSkeletonView(isCompleting: false, promotions: (1...7).map {
+        Promotion(id: "preview-\($0)", imageName: "discount view",
+                  title: "On International Flight\nBookings", url: URL(string: "https://gozayaan.com")!)
+    }, onLearnMore: { _ in }).frame(width: 320)
         .dynamicTypeSize(.accessibility3)
 }

@@ -19,6 +19,34 @@ final class FlightResultsCompositionTests: XCTestCase {
         XCTAssertEqual(coordinator.viewModel.state, .empty)
     }
 
+    func testDummyPromotionsNavigateDuringLoadingAndAfterSuccess() async {
+        var openedURLs: [URL] = []
+        let leg = SerpApiFlightLeg(
+            departureAirport: SerpApiAirport(id: "DAC", time: "2026-10-01 10:00"),
+            arrivalAirport: SerpApiAirport(id: "BKK", time: "2026-10-01 12:00"),
+            duration: 120, airline: "Airline", airlineLogo: nil)
+        let response = SerpApiFlightSearchResponse(bestFlights: [
+            SerpApiFlightGroup(flights: [leg], layovers: nil,
+                              totalDuration: 120, price: 100, airlineLogo: nil)
+        ], otherFlights: nil)
+        let coordinator = FlightResultsCoordinator(
+            service: MockFlightSearchService(result: .success(response)),
+            openURL: { openedURLs.append($0) })
+        let model = coordinator.viewModel
+        let promotions = model.promotions
+        XCTAssertEqual(model.state, .loading)
+        XCTAssertEqual(promotions.count, 3)
+        XCTAssertEqual(Set(promotions.map(\.id)).count, 3)
+        XCTAssertTrue(promotions.allSatisfy { $0.imageName == "discount view" })
+        promotions.forEach(model.selectPromotion)
+        await model.loadFlights()
+        guard case .success = model.state else { return XCTFail("Expected success") }
+        model.selectSort(.fastest)
+        XCTAssertEqual(model.promotions, promotions)
+        promotions.forEach(model.selectPromotion)
+        XCTAssertEqual(openedURLs, Array(repeating: URL(string: "https://gozayaan.com")!, count: 6))
+    }
+
     func testPromotionIntentReachesCoordinator() async {
         var openedURL: URL?
         let coordinator = FlightResultsCoordinator(

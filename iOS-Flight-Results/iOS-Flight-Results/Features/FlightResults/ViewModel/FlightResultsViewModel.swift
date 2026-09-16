@@ -20,6 +20,11 @@ final class FlightResultsViewModel: ObservableObject {
     weak var output: (any FlightResultsCoordinatorDelegate)?
     let request: FlightSearchRequest
     let dateFareOptions: [DateFareOption]
+    let promotions: [Promotion] = (1...7).map { index in
+        Promotion(id: "discount-\(index)", imageName: "discount view",
+                  title: "On International Flight\nBookings",
+                  url: URL(string: "https://gozayaan.com")!)
+    }
     private let service: any FlightSearchServicing
     private let mapper: FlightOfferMapper
     private var offers: [FlightOffer] = []
