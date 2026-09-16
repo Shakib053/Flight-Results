@@ -5,11 +5,16 @@
 //  Created by Kazi Tanjim Shakib on 15/9/26.
 //
 
+import Combine
 import SwiftUI
 
 /// Renders an injected ViewModel owned by the feature Coordinator.
 struct FlightResultsView: View {
     @ObservedObject var viewModel: FlightResultsViewModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var displayedState: FlightResultsViewModel.State = .loading
+    @State private var isCompletingLoading = false
+    @State private var completionTask: Task<Void, Never>?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,10 +24,10 @@ struct FlightResultsView: View {
 
             DateFareStripView(
                 options: viewModel.dateFareOptions,
-                isLoading: viewModel.state == .loading
+                isLoading: isLoadingVisible
             )
 
-            switch viewModel.state {
+            switch displayedState {
             case .loading:
                 SortFilterBarView(
                     selectedSort: viewModel.sortOption,
@@ -30,7 +35,7 @@ struct FlightResultsView: View {
                     onSelectSort: viewModel.selectSort,
                     onFilterTapped: {}
                 )
-                LoadingSkeletonView()
+                LoadingSkeletonView(isCompleting: isCompletingLoading)
             case .success(let offers):
                 SortFilterBarView(
                     selectedSort: viewModel.sortOption,
@@ -66,12 +71,47 @@ struct FlightResultsView: View {
         .task {
             await viewModel.loadFlights()
         }
+        .onReceive(viewModel.$state.removeDuplicates()) { state in
+            show(state)
+        }
+        .onDisappear {
+            completionTask?.cancel()
+        }
     }
 
     @ViewBuilder
     private func resultsContent<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         VStack(spacing: 16, content: content)
             .padding()
+    }
+
+    private var isLoadingVisible: Bool {
+        if case .loading = displayedState { return true }
+        return false
+    }
+
+    private func show(_ state: FlightResultsViewModel.State) {
+        completionTask?.cancel()
+
+        guard case .loading = state else {
+            guard case .loading = displayedState, !reduceMotion else {
+                displayedState = state
+                isCompletingLoading = false
+                return
+            }
+
+            isCompletingLoading = true
+            completionTask = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(220))
+                guard !Task.isCancelled else { return }
+                displayedState = state
+                isCompletingLoading = false
+            }
+            return
+        }
+
+        displayedState = .loading
+        isCompletingLoading = false
     }
 }
 #Preview {

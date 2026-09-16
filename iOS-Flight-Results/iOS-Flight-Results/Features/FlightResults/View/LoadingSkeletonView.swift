@@ -4,6 +4,7 @@ import SwiftUI
 struct LoadingSkeletonView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    let isCompleting: Bool
     @State private var startedAt = Date()
     @ScaledMetric(relativeTo: .headline) private var messageSize = 20.0
 
@@ -21,7 +22,8 @@ struct LoadingSkeletonView: View {
                                 paused: reduceMotion || scenePhase != .active)) { context in
             let elapsed = max(0, context.date.timeIntervalSince(startedAt))
             let fraction = min(elapsed / 12, 1)
-            let progress = reduceMotion ? 0.41 : 0.9 * (1 - pow(1 - fraction, 3))
+            let simulatedProgress = reduceMotion ? 0.41 : 0.9 * (1 - pow(1 - fraction, 3))
+            let progress = isCompleting ? 1.0 : simulatedProgress
 
             ScrollView {
                 VStack(spacing: 0) {
@@ -34,6 +36,7 @@ struct LoadingSkeletonView: View {
                             }
                     }
                     .frame(height: 8)
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.22), value: isCompleting)
                     .accessibilityHidden(true)
 
                     Text("Hang tight! We’re finding the best flight options for you.")
@@ -99,10 +102,10 @@ struct LoadingSkeletonView: View {
 }
 
 #Preview("Loading · 375 points") {
-    LoadingSkeletonView().frame(width: 375)
+    LoadingSkeletonView(isCompleting: false).frame(width: 375)
 }
 
 #Preview("Loading · narrow, large text") {
-    LoadingSkeletonView().frame(width: 320)
+    LoadingSkeletonView(isCompleting: false).frame(width: 320)
         .dynamicTypeSize(.accessibility3)
 }
