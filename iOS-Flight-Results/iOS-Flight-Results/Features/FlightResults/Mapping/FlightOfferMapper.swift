@@ -6,23 +6,28 @@ struct FlightOfferMapper {
 
     func map(_ response: SerpApiFlightSearchResponse, currencyCode: String) -> [FlightOffer] {
         let groups = (response.bestFlights ?? []) + (response.otherFlights ?? [])
+        var seenIDs = Set<String>()
         return groups.compactMap { map($0, currencyCode: currencyCode) }
+            .filter { seenIDs.insert($0.id).inserted }
     }
 
     func map(_ group: SerpApiFlightGroup, currencyCode: String) -> FlightOffer? {
-        guard let first = group.flights.first, let last = group.flights.last,
-              group.price >= 0, group.totalDuration >= 0,
+        guard let flights = group.flights, !flights.isEmpty,
+              let priceValue = group.price, let totalDuration = group.totalDuration,
+              priceValue >= 0, totalDuration >= 0,
+              let airlines = validatedAirlines(in: flights),
+              let first = flights.first, let last = flights.last,
               !first.departureAirport.id.isEmpty, !last.arrivalAirport.id.isEmpty else { return nil }
 
         let price: Int
         let displayCurrency: String
         if currencyCode == "USD", let rate = usdToBdtRate {
-            let converted = group.price.multipliedReportingOverflow(by: rate)
+            let converted = priceValue.multipliedReportingOverflow(by: rate)
             guard rate > 0, !converted.overflow else { return nil }
             price = converted.partialValue
             displayCurrency = "BDT"
         } else {
-            price = group.price
+            price = priceValue
             displayCurrency = currencyCode
         }
 
@@ -42,21 +47,17 @@ struct FlightOfferMapper {
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
         let dayOffset = calendar.dateComponents([.day], from: calendar.startOfDay(for: departure),
                                                to: calendar.startOfDay(for: arrival)).day ?? 0
-        var airlines: [String] = []
-        for leg in group.flights where !airlines.contains(leg.airline) {
-            airlines.append(leg.airline)
-        }
-        let logo = ([group.airlineLogo] + group.flights.map(\.airlineLogo))
+        let logo = ([group.airlineLogo] + flights.map(\.airlineLogo))
             .compactMap { $0 }
             .compactMap { URL(string: $0) }
             .first { ["https", "http"].contains($0.scheme?.lowercased() ?? "") && $0.host != nil }
 
         // Length-prefixed fields avoid ambiguous concatenation and remain stable across launches.
         // Include the fare to distinguish separate priced offers for the same itinerary.
-        let identity = group.flights.flatMap {
+        let identity = flights.flatMap {
             [$0.departureAirport.id, $0.departureAirport.time, $0.arrivalAirport.id,
-             $0.arrivalAirport.time, $0.airline, String($0.duration)]
-        } + [String(group.totalDuration), String(group.price), currencyCode]
+             $0.arrivalAirport.time, $0.airline!, String($0.duration)]
+        } + [String(totalDuration), String(priceValue), currencyCode]
         let id = identity.map { "\($0.utf8.count):\($0)" }.joined()
         parser.dateFormat = "HH:mm"
         return FlightOffer(
@@ -68,10 +69,22 @@ struct FlightOfferMapper {
             departureTime: parser.string(from: departure),
             arrivalTime: parser.string(from: arrival),
             arrivalDayOffset: dayOffset,
-            totalDurationMinutes: group.totalDuration,
-            stopCount: group.layovers?.count ?? max(0, group.flights.count - 1),
+            totalDurationMinutes: totalDuration,
+            stopCount: group.layovers?.count ?? max(0, flights.count - 1),
             price: price,
             currencyCode: displayCurrency
         )
+    }
+
+    private func validatedAirlines(in flights: [SerpApiFlightLeg]) -> [String]? {
+        var result: [String] = []
+        for leg in flights {
+            guard let airline = leg.airline?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !airline.isEmpty else { return nil }
+            if !result.contains(airline) {
+                result.append(airline)
+            }
+        }
+        return result
     }
 }

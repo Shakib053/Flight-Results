@@ -32,6 +32,7 @@ Examples:
 
 - Used AI to generate data-fetching states and related boilerplate.
 - Performed sanity testing using temporary logs to verify that data was actually being received and matched the expected format.
+- **JSON parsing.** The initial AI-generated DTOs used non-optional required fields and standard array decoding, which meant that one missing field, explicit JSON `null`, or type mismatch could fail the entire API response and disrupt the UI state. I found this during manual review and had to explicitly instruct the AI to add tolerant custom decoding that discards malformed flight groups, preserves valid siblings, and lets the mapper reject incomplete offers. This reinforced that API payload resilience must be verified manually rather than assumed from generated models.
 - **Currency.** The task brief suggests the following request, which uses `currency=BDT`:
   ```
   GET https://serpapi.com/search?engine=google_flights&departure_id=DAC&arrival_id=BKK&outbound_date=2026-02-15&type=2&currency=BDT&hl=en&api_key=YOUR_SERPAPI_KEY

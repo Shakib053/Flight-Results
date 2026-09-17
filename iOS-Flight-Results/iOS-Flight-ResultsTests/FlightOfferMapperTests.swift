@@ -61,6 +61,32 @@ final class FlightOfferMapperTests: XCTestCase {
         XCTAssertEqual(mapper.map(response, currencyCode: "BDT").map(\.airlineName), ["First", "Second"])
     }
 
+    func testDeduplicatesExactOffersAndPreservesFirstOccurrence() throws {
+        let first = group([leg(airline: "First")])
+        let second = group([leg(airline: "Second")])
+        let response = SerpApiFlightSearchResponse(
+            bestFlights: [first, first, second], otherFlights: [first, second]
+        )
+
+        let offers = mapper.map(response, currencyCode: "BDT")
+
+        XCTAssertEqual(offers.map(\.airlineName), ["First", "Second"])
+        XCTAssertEqual(Set(offers.map(\.id)).count, offers.count)
+    }
+
+    func testSameItineraryWithDifferentFareOrDurationRemainsDistinct() {
+        let flight = leg()
+        let response = SerpApiFlightSearchResponse(bestFlights: [
+            group([flight]),
+            SerpApiFlightGroup(flights: [flight], layovers: nil,
+                               totalDuration: 301, price: 37400, airlineLogo: nil),
+            SerpApiFlightGroup(flights: [flight], layovers: nil,
+                               totalDuration: 300, price: 37401, airlineLogo: nil)
+        ], otherFlights: nil)
+
+        XCTAssertEqual(mapper.map(response, currencyCode: "BDT").count, 3)
+    }
+
     private func leg(origin: String = "DAC", destination: String = "BKK",
                      arrival: String = "2026-10-02 04:30", airline: String = "First",
                      logo: String? = nil) -> SerpApiFlightLeg {
