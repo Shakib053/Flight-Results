@@ -40,7 +40,7 @@ struct EmptyStateView: View {
                     .padding(.top, 36)
 
                     Button(action: onSearchAgain) {
-                        Text("Search Again")
+                        Text("Try Again")
                             .font(.headline.weight(.bold))
                             .foregroundStyle(navy)
                             .padding(.horizontal, 32)

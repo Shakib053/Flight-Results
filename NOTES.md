@@ -26,7 +26,7 @@ Examples:
 - **Concurrency.** Codex identified concurrency warnings but did not fully resolve them. I reviewed the code and fixed the remaining data-race issues manually.
 - **RouteHeaderView.** Codex incorrectly aligned controls to the top instead of vertically centering them, and added unwanted outer padding that left white margins around the header. I identified and corrected both issues.
 - **UI details.** Some specific requirements were missed even when stated explicitly. For example, the selected-day highlight in the date and fare strip was specified in both the prompt and the Figma frame, and still came back missing on the first pass. I provided more targeted prompts after reviewing the implementation and refined the output.
-- **Empty state.** The first pass at the empty state dropped the date and fare strip from the layout entirely, causing the screen to jump between states instead of staying visually consistent. This wasn't caught by the tool on its own — I identified the inconsistency during review and gave a specific prompt describing the expected behavior before it was handled properly.
+- **Empty state.** The initial implementation exposed a layout edge case around the date-fare strip. Showing it as a second layer in the empty state created visual inconsistency, so I reviewed the behavior and provided a specific prompt describing the expected state handling. The final implementation hides the strip for empty and error states.
 
 ## Data & API Validation
 

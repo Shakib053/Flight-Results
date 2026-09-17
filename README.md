@@ -17,7 +17,7 @@ A SwiftUI flight-results app powered by SerpApi's Google Flights API. It searche
 
 ## Setup and run
 
-Requires **Xcode 26+** and an **iOS 17+** simulator or device.
+The app targets **iOS 17+**. The project was created with Xcode 26.0.1; Xcode 26.0.1 or later is recommended.
 
 1. In `iOS-Flight-Results/iOS-Flight-Results/Configuration/`, copy `Secrets.example.xcconfig` to `Secrets.xcconfig`.
 2. Replace the placeholder with your SerpApi key: `SERPAPI_API_KEY = "YOUR_ACTUAL_KEY"`. This secrets file is gitignored; `App.xcconfig` loads it automatically.
@@ -35,8 +35,9 @@ Select the same scheme and an **iOS 26+ simulator**, then press **⌘U**. XCTest
 - The requested date's fare comes from returned offers; adjacent-date fares and promotions are sample data.
 - Progress is simulated. Edit/Filter are decorative, date taps are display-only, and flight cards do not navigate.
 
-## Demonstrate empty and error states
+## Demonstrate all four states
 
-Open the existing `FlightResultsView` Xcode preview: it uses `MockFlightSearchService(result: .empty)`. For error, change the mock result to `.failure(URLError(.notConnectedToInternet))`.
-
-To demonstrate either in the running app, temporarily replace `SerpApiFlightSearchService()` in `AppCoordinator` with the corresponding mock. Run with **⌘R**; retry repeats the mock outcome. Restore the live service afterward.
+- **Loading:** Launch the app normally; the loading skeleton appears while the search runs.
+- **Success:** Launch with a valid SerpApi key.
+- **Error:** Launch with a missing or invalid key, or while offline.
+- **Empty:** Use `MockFlightSearchService(result: .empty)` in the `FlightResultsView` preview, or temporarily inject it in `AppCoordinator` to run the app with the empty fixture. Restore `SerpApiFlightSearchService()` afterward.
