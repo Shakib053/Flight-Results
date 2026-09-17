@@ -135,6 +135,12 @@ struct FlightResultsView: View {
             destinationCode: "JFK", destinationCity: "New York",
             departureDate: Date(), passengerCount: 2, currencyCode: "USD"
         ),
-        service: MockFlightSearchService(result: .empty)
+        service: PreviewFlightSearchService()
     ))
+}
+
+private struct PreviewFlightSearchService: FlightSearchServicing {
+    func fetchFlights(for request: FlightSearchRequest) async throws -> SerpApiFlightSearchResponse {
+        SerpApiFlightSearchResponse(bestFlights: [], otherFlights: [])
+    }
 }

@@ -27,7 +27,7 @@ For a physical device, select your development team under Signing & Capabilities
 
 ## Tests
 
-Select the same scheme and an **iOS 26+ simulator**, then press **⌘U**. XCTest covers mapping/currency conversion, loading/success/empty/error states, retries, sorting, and coordinator composition/navigation. Tests use mocks and require no API key.
+Select the same scheme and an **iOS 17+ simulator**, then press **⌘U**. XCTest covers SerpApi's nested flights and layovers mapping (including a multi-leg, two-stop result), currency conversion, loading/success/empty/error states, retries, sorting, and coordinator composition/navigation. Tests use mocks and require no API key.
 
 ## Important decisions
 
@@ -40,4 +40,4 @@ Select the same scheme and an **iOS 26+ simulator**, then press **⌘U**. XCTest
 - **Loading:** Launch the app normally; the loading skeleton appears while the search runs.
 - **Success:** Launch with a valid SerpApi key.
 - **Error:** Launch with a missing or invalid key, or while offline.
-- **Empty:** Use `MockFlightSearchService(result: .empty)` in the `FlightResultsView` preview, or temporarily inject it in `AppCoordinator` to run the app with the empty fixture. Restore `SerpApiFlightSearchService()` afterward.
+- **Empty:** Open the `FlightResultsView` preview, which uses a private service that returns no flights. To run the full app in this state, temporarily inject an empty `FlightSearchServicing` stub in `AppCoordinator`, then restore `SerpApiFlightSearchService()` afterward.

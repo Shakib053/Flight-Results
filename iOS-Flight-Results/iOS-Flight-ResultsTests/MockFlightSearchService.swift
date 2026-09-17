@@ -1,3 +1,5 @@
+@testable import iOS_Flight_Results
+
 struct MockFlightSearchService: FlightSearchServicing {
     enum Result {
         case success(SerpApiFlightSearchResponse)

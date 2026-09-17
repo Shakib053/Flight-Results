@@ -32,6 +32,32 @@ final class SerpApiDTOsTests: XCTestCase {
         XCTAssertEqual(offers.first?.arrivalAirportCode, "BKK")
     }
 
+    func testNestedMultiLegItineraryMapsToTwoStops() throws {
+        var group = validGroup()
+        group["flights"] = [
+            validLeg(origin: "DAC", destination: "BKK", departure: "2027-02-15 09:35",
+                     arrival: "2027-02-15 13:10", airline: "First"),
+            validLeg(origin: "BKK", destination: "DOH", departure: "2027-02-15 15:00",
+                     arrival: "2027-02-15 22:00", airline: "Second"),
+            validLeg(origin: "DOH", destination: "JFK", departure: "2027-02-16 02:00",
+                     arrival: "2027-02-16 14:00", airline: "Second")
+        ]
+        group["layovers"] = [
+            ["duration": 110, "id": "BKK", "name": "Bangkok"],
+            ["duration": 240, "id": "DOH", "name": "Doha"]
+        ]
+        group["total_duration"] = 1_705
+
+        let response = try decode(["best_flights": [group]])
+        let offer = try XCTUnwrap(mapper.map(response, currencyCode: "USD").first)
+
+        XCTAssertEqual(offer.departureAirportCode, "DAC")
+        XCTAssertEqual(offer.arrivalAirportCode, "JFK")
+        XCTAssertEqual(offer.airlineName, "First, Second")
+        XCTAssertEqual(offer.stopCount, 2)
+        XCTAssertEqual(offer.totalDurationMinutes, 1_705)
+    }
+
     func testMissingNullAndWrongRequiredValuesDecodeButAreRejectedByMapper() throws {
         let cases: [(key: String, value: Any?)] = [
             ("flights", nil), ("flights", NSNull()), ("flights", "not-an-array"),
@@ -115,10 +141,13 @@ final class SerpApiDTOsTests: XCTestCase {
         ["flights": [validLeg()], "total_duration": 155, "price": 212]
     }
 
-    private func validLeg(airline: String = "Airline") -> [String: Any] {
+    private func validLeg(origin: String = "DAC", destination: String = "BKK",
+                          departure: String = "2027-02-15 09:35",
+                          arrival: String = "2027-02-15 13:10",
+                          airline: String = "Airline") -> [String: Any] {
         [
-            "departure_airport": ["id": "DAC", "time": "2027-02-15 09:35"],
-            "arrival_airport": ["id": "BKK", "time": "2027-02-15 13:10"],
+            "departure_airport": ["id": origin, "time": departure],
+            "arrival_airport": ["id": destination, "time": arrival],
             "duration": 155,
             "airline": airline
         ]
