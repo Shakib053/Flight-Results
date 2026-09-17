@@ -45,6 +45,16 @@ struct SerpApiFlightSearchService: FlightSearchServicing {
             URLQueryItem(name: "api_key", value: apiKey)
         ]
         guard let url = components.url else { throw FlightSearchError.invalidRequest }
+        var loggedComponents = components
+        loggedComponents.queryItems = loggedComponents.queryItems?.map { item in
+            item.name == "api_key" ? URLQueryItem(name: item.name, value: "<redacted>") : item
+        }
+
+        // Temporary diagnostic logging helps investigate request and response issues.
+        // Production apps should route this through OSLog with appropriate privacy redaction.
+
+        print("Google Flights API request: \(loggedComponents.url?.absoluteString ?? url.absoluteString)")
+
         let data: Data
         let response: URLResponse
         do {
@@ -57,20 +67,23 @@ struct SerpApiFlightSearchService: FlightSearchServicing {
             // Underlying errors can contain the request URL and its API key.
             throw FlightSearchError.transport
         }
+
+        // Temporary raw-response logging is retained to diagnose API payload and empty-result behavior.
+        // Replace with privacy-aware OSLog instrumentation before production release.
+
+        print("Google Flights API response: \(String(data: data, encoding: .utf8) ?? "<non-UTF8 response>")")
+
         guard let http = response as? HTTPURLResponse else {
             throw FlightSearchError.invalidResponse
         }
         guard (200..<300).contains(http.statusCode) else {
-            #if DEBUG
-            if let body = String(data: data, encoding: .utf8) {
-                print("SerpApi response (\(http.statusCode)): \(body)")
-            }
-            #endif
             throw FlightSearchError.httpStatus(http.statusCode)
         }
-        // An API error must not appear as an empty successful search.
+        // Google returns an `error` string for a valid search with no matching flights.
+        // Preserve that payload as an empty result so the UI can show EmptyStateView.
         if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           object["error"] is String {
+           object["error"] is String,
+           !isFullyEmptyFlightSearch(object) {
             throw FlightSearchError.apiError
         }
         do {
@@ -78,5 +91,13 @@ struct SerpApiFlightSearchService: FlightSearchServicing {
         } catch {
             throw FlightSearchError.decoding
         }
+    }
+
+    private func isFullyEmptyFlightSearch(_ object: [String: Any]) -> Bool {
+        guard let information = object["search_information"] as? [String: Any],
+              let state = information["flights_results_state"] as? String else {
+            return false
+        }
+        return state.caseInsensitiveCompare("Fully empty") == .orderedSame
     }
 }

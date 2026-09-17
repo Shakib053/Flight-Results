@@ -97,6 +97,15 @@ final class SerpApiDTOsTests: XCTestCase {
         ))
     }
 
+    func testFullyEmptyGoogleFlightsPayloadMapsToEmptyResults() throws {
+        let response = try decode([
+            "search_information": ["flights_results_state": "Fully empty"],
+            "error": "Google Flights hasn't returned any results for this query."
+        ])
+
+        XCTAssertTrue(mapper.map(response, currencyCode: "USD").isEmpty)
+    }
+
     private func decode(_ payload: [String: Any]) throws -> SerpApiFlightSearchResponse {
         let data = try JSONSerialization.data(withJSONObject: payload)
         return try JSONDecoder().decode(SerpApiFlightSearchResponse.self, from: data)
