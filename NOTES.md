@@ -73,5 +73,6 @@ AI accelerated development, but the final implementation was driven by review, e
 ## Known Trade-offs & Current Status
 
 - The Filter button and the Edit action are decorative, as the task allows.
-- Date strip taps are ignored and its fares are hardcoded.
+- Date strip taps are display-only.
+- The requested departure date's fare is populated from the returned search offers; only the surrounding dates use hardcoded sample fares, per the instructions.
 - Flight cards do not navigate anywhere; the Coordinator delegate carries the promotion tap, and Learn more is the only real navigation the screen has.
